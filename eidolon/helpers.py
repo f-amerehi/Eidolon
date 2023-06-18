@@ -245,7 +245,7 @@ def StackDisarray(aDOGScaleSpace, xDisplacements, yDisplacements, reach):
     sd = StackDisarrayGenerator(aDOGScaleSpace, xDisplacements, yDisplacements, reach)
     tmp = None
     for plane in sd:
-        if tmp == None:
+        if tmp is None:
             tmp = np.zeros(plane.shape)
         tmp += plane
     return tmp
