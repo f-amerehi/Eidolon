@@ -48,9 +48,9 @@ class Convolution(object):
 
     # make kernel to convolve with
     def Kernel(self, xOrder, yOrder, w, h, sigma):
-        v = np.array(range(h/2 + 1) + range(h/2-h + 1, 0))
+        v = np.array(list(range(h/2 + 1)) + list(range(h/2-h + 1, 0)))
         column = ((-1.0/(sigma * sqrt(2)))**yOrder) * self.HermitePolynomial(yOrder, v/(sigma * sqrt(2))) * self.Gaussian(v, sigma)
-        u = np.array(range(w/2 + 1) + range(w/2-w + 1, 0))
+        u = np.array(list(range(w/2 + 1)) + list(range(w/2-w + 1, 0)))
         row = ((-1.0/(sigma * sqrt(2)))**xOrder) * self.HermitePolynomial(xOrder, u/(sigma * sqrt(2))) * self.Gaussian(u, sigma)
         return row * column[:, np.newaxis]
 
@@ -87,7 +87,7 @@ class DifferentialScaleSpace(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.current == self.pic.numScaleLevels:
             raise StopIteration("Out of bounds! The number of scale levels is " + str(self.pic.numScaleLevels) + "!")
         else:
@@ -127,7 +127,7 @@ class RockBottomPlane(DifferentialScaleSpace):
     def __init__(self, picture):
         super(RockBottomPlane, self).__init__(picture, 0, 0)
 
-    def next(self):
+    def __next__(self):
         if self.current == 1:
             raise StopIteration("Out of bounds! Only 1 RockBottomPlane!")
         else:
@@ -151,19 +151,19 @@ class DOGScaleSpace(object):
         self.numScaleLevels = picture.numScaleLevels
         self.scaleStackGenerator = ScaleSpace(picture)
         self.current = 0
-        self.first = self.scaleStackGenerator.next()
+        self.first = next(self.scaleStackGenerator)
 
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.current == self.numScaleLevels:
             raise StopIteration("DOGScaleSpace out of bounds! The number of scale levels is " + str(self.numScaleLevels) + "!")
         else:
             first = np.copy(self.first)
             self.current += 1
             if self.current < self.numScaleLevels:
-                self.second = self.scaleStackGenerator.next()
+                self.second = next(self.scaleStackGenerator)
                 self.first = self.second
                 second = np.copy(self.second)
                 return first - second
@@ -192,17 +192,17 @@ class FiducialSecondOrder(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.current == self.numScaleLevels:
             raise StopIteration("FiducialSecondOrder out of bounds! The number of scale levels is " + str(self.numScaleLevels) + "!")
         else:
             self.current += 1
-            fiducialSecondOrderPScaleSpace = self.hessianXX.next()
+            fiducialSecondOrderPScaleSpace = next(self.hessianXX)
             # Here I transform from the Hessian matrix representation to a nice
             # isotropic basis of three line finders at 60 degrees orientation differences.
             # The coefficients are easy enough to find with a little algebra.
-            tmp1 = fiducialSecondOrderPScaleSpace * (1.0/8) + self.hessianYY.next() * (3.0/8)
-            tmp2 = self.hessianXY.next() * (-np.sqrt(3)/4.0)
+            tmp1 = fiducialSecondOrderPScaleSpace * (1.0/8) + next(self.hessianYY) * (3.0/8)
+            tmp2 = next(self.hessianXY) * (-np.sqrt(3)/4.0)
 
             # fiducialSecondOrderPScaleSpace = hessianXX #// these are the simple cell ("line finder") activities
             fiducialSecondOrderQScaleSpace = tmp1 + tmp2 #// the basis consists of three line finders at 120 degrees orientation increments
@@ -230,12 +230,12 @@ class FiducialLaplacian(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.current == self.numScaleLevels:
             raise StopIteration("FiducialLaplacian out of bounds! The number of scale levels is " + str(self.numScaleLevels) + "!")
         else:
             self.current += 1
-            return self.hessianXX.next() + self.hessianYY.next()
+            return next(self.hessianXX) + next(self.hessianYY)
 
 
 
@@ -244,7 +244,7 @@ class FiducialLaplacian(object):
 # Program
 #
 #==============================================================================
-from picture import *
+from .picture import *
 
 def testFunction():
 #    SZ = 16
@@ -302,7 +302,7 @@ def testFunction():
 #==============================================================================
     fiducialLaplacianGenerator = FiducialLaplacian(pic)
     for i in range(numScaleLevels):
-        x = fiducialLaplacianGenerator.next()
+        x = next(fiducialLaplacianGenerator)
 #        print i, "\n", x
         p += x
 #        Image.fromarray(x.astype('uint8'), 'L').show()
@@ -333,4 +333,4 @@ def testFunction():
 if __name__ == "__main__":
     testFunction()
 
-    print "Scalespaces Done!"
+    print("Scalespaces Done!")

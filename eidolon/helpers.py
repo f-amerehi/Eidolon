@@ -6,7 +6,7 @@ import numpy as np
 #==============================================================================
 # Eidolon imports
 #==============================================================================
-from noise import *
+from .noise import *
 
 #==============================================================================
 # Helper functions
@@ -18,10 +18,10 @@ from noise import *
 def StackIntegrate(aScaleSpace, numScaleLevels, scaleLevels, picSize):
     tmp = np.zeros(picSize)
 
-    first = aScaleSpace.next()
+    first = next(aScaleSpace)
     for k in range (numScaleLevels-1):
         interval = 0.5 * (scaleLevels[k] - scaleLevels[k+1])
-        second = aScaleSpace.next()
+        second = next(aScaleSpace)
         tmp = tmp + (first + second) * (interval * scaleLevels[k])
         first = second
 
@@ -34,7 +34,7 @@ def StackIntegrateMultiple(aScaleSpace, numScaleLevels, scaleLevels, picSize):
     second = list()
     tmp = list()
 
-    first = aScaleSpace.next()
+    first = next(aScaleSpace)
     numberOfScaleSpaces = len(first)
 
     for i in range (numberOfScaleSpaces):
@@ -42,7 +42,7 @@ def StackIntegrateMultiple(aScaleSpace, numScaleLevels, scaleLevels, picSize):
 
     for k in range (numScaleLevels-1):
         interval = 0.5 * (scaleLevels[k] - scaleLevels[k+1])
-        second = aScaleSpace.next()
+        second = next(aScaleSpace)
         for i in range (numberOfScaleSpaces):
             tmp[i] = tmp[i] + (first[i] + second[i]) * (interval * scaleLevels[k])
         first = second
@@ -100,7 +100,7 @@ def LotzeDisarray(aDOGScaleSpace, reach, grain, numScaleLevels, w, h):
     #// this essentially yields an exact integral over scale
     #// because the DOG samples are slices, not poit samples
     for i in range (numScaleLevels):
-        tmp += DataPlaneDisarray(aDOGScaleSpace.next(), i1.next(), i2.next(), reach)
+        tmp += DataPlaneDisarray(next(aDOGScaleSpace), next(i1), next(i2), reach)
     return tmp
 
 
@@ -111,7 +111,7 @@ def HelmholtzDisarray(aDOGScaleSpace, reach, numScaleLevels, w, h, MAX_SIGMA, sc
     i2 = IncoherentScaledGaussianDataStack(numScaleLevels, w, h, MAX_SIGMA, scaleLevels)
 
     for i in range (numScaleLevels):
-        tmp += DataPlaneDisarray(aDOGScaleSpace.next(), i1.next(), i2.next(), MAX_SIGMA * reach)
+        tmp += DataPlaneDisarray(next(aDOGScaleSpace), next(i1), next(i2), MAX_SIGMA * reach)
     return tmp
 
 
@@ -123,7 +123,7 @@ def CoherentDisarray(aDOGScaleSpace, reach, w, h, MAX_SIGMA, numScaleLevels, sca
     c2 = CoherentRandomGaussianDataStack(numScaleLevels, w, h, MAX_SIGMA, scaleLevels)
 
     for i in range (numScaleLevels):
-        tmp += DataPlaneDisarray(aDOGScaleSpace.next(), c1.next(), c2.next(), reach)
+        tmp += DataPlaneDisarray(next(aDOGScaleSpace), next(c1), next(c2), reach)
     return tmp
 
 
@@ -138,9 +138,9 @@ def StackDisarrayDiscrete(aScaleSpace, xP, yP, xQ, yQ, xR, yR, reach, numScaleLe
 # helper for StackDisarrayDiscrete
 def StackDisarrayDiscreteGenerator(aScaleSpace, xP, yP, xQ, yQ, xR, yR, reach):
     for p, q, r in aScaleSpace:
-        pD = DataPlaneDisarray(p, xP.next(), yP.next(), reach)
-        qD = DataPlaneDisarray(q, xQ.next(), yQ.next(), reach)
-        rD = DataPlaneDisarray(r, xR.next(), yR.next(), reach)
+        pD = DataPlaneDisarray(p, next(xP), next(yP), reach)
+        qD = DataPlaneDisarray(q, next(xQ), next(yQ), reach)
+        rD = DataPlaneDisarray(r, next(xR), next(yR), reach)
         yield (pD, qD, rD)
 
 
@@ -254,7 +254,7 @@ def StackDisarray(aDOGScaleSpace, xDisplacements, yDisplacements, reach):
 # helper for StackDisarray
 def StackDisarrayGenerator(aScaleSpace, x, y, reach):
     for scaleSpace in aScaleSpace:
-        yield DataPlaneDisarray(scaleSpace, x.next(), y.next(), reach)
+        yield DataPlaneDisarray(scaleSpace, next(x), next(y), reach)
 
 
 def ImageToOpponentRepresentation(dataRed, dataGreen, dataBlue):

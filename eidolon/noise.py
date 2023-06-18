@@ -3,7 +3,7 @@
 #==============================================================================
 import numpy as np
 
-from scalespaces import Convolution
+from .scalespaces import Convolution
 
 #==============================================================================
 
@@ -110,7 +110,7 @@ class IncoherentGaussianDataStack(DataStack):
         super(IncoherentGaussianDataStack, self).__init__(numScaleLevels, w, h)
         self.sigma = sigma
 
-    def next(self):
+    def __next__(self):
         if self.current == self.numScaleLevels:
             raise StopIteration("Out of bounds! The number of scale levels is " + str(self.numScaleLevels) + "!")
         else:
@@ -131,7 +131,7 @@ class IncoherentScaledGaussianDataStack(DataStack):
         self.MAX_SIGMA = MAX_SIGMA
         self.scaleLevels = scaleLevels
 
-    def next(self):
+    def __next__(self):
         if self.current == self.numScaleLevels:
             raise StopIteration("Out of bounds! The number of scale levels is " + str(self.numScaleLevels) + "!")
         else:
@@ -175,7 +175,7 @@ class CoherentRandomGaussianDataStack(DataStack):
         # reverse list because we'll pop the elements off
         self.listOfDataPlanes.reverse()
 
-    def next(self):
+    def __next__(self):
         if self.current == self.numScaleLevels:
             raise StopIteration("Out of bounds! The number of scale levels is " + str(self.numScaleLevels) + "!")
         else:
@@ -213,14 +213,14 @@ class PartiallyCoherentScaledGaussianDataStack(DataStack):
         self.coh = CoherentRandomGaussianDataStack(numScaleLevels, w, h,
                                                    MAX_SIGMA, scaleLevels)
 
-    def next(self):
+    def __next__(self):
         if self.current == self.numScaleLevels:
             raise StopIteration("Out of bounds! The number of scale levels is "
                                 + str(self.numScaleLevels) + "!")
         else:
             self.current += 1
-            return ((1 - self.degree) * self.incoh.next() +
-                    self.degree * self.coh.next())
+            return ((1 - self.degree) * next(self.incoh) +
+                    self.degree * next(self.coh))
 
 
 
@@ -251,36 +251,36 @@ def testFunction():
     degree = 0.666
 
     r = RandomDataPlane(w, h)
-    print "randomGaussianDataPlane \n", r.randomGaussianDataPlane
-    print "randomUniformDataPlane \n", r.randomUniformDataPlane
+    print("randomGaussianDataPlane \n", r.randomGaussianDataPlane)
+    print("randomUniformDataPlane \n", r.randomUniformDataPlane)
 
     r = RandomDataPlane(w, h, loc=10.0, scale=20)
-    print "randomGaussianDataPlane \n", r.randomGaussianDataPlane
-    print "randomUniformDataPlane \n", r.randomUniformDataPlane
+    print("randomGaussianDataPlane \n", r.randomGaussianDataPlane)
+    print("randomUniformDataPlane \n", r.randomUniformDataPlane)
 
     r = RandomDataPlane(w, h, low=10.0, high=100.0)
-    print "randomGaussianDataPlane \n", r.randomGaussianDataPlane
-    print "randomUniformDataPlane \n", r.randomUniformDataPlane
+    print("randomGaussianDataPlane \n", r.randomGaussianDataPlane)
+    print("randomUniformDataPlane \n", r.randomUniformDataPlane)
 
     b = BlurredRandomGaussianDataPlane(w, h, sigma)
-    print "blurredRandomGaussianDataPlane \n", b.blurredRandomGaussianDataPlane
+    print("blurredRandomGaussianDataPlane \n", b.blurredRandomGaussianDataPlane)
 
     s = ScaledBlurredRandomGaussianDataPlane(w, h, sigma, MAX_SIGMA)
-    print "scaledBlurredRandomGaussianDataPlane \n", s.scaledBlurredRandomGaussianDataPlane
+    print("scaledBlurredRandomGaussianDataPlane \n", s.scaledBlurredRandomGaussianDataPlane)
 
     i1 = IncoherentGaussianDataStack(numScaleLevels, w, h, sigma)
     teller = 1
     for x in i1:
-        print teller, "\n"
+        print(teller, "\n")
         teller += 1
-        print x
+        print(x)
 
     i2 = IncoherentScaledGaussianDataStack(numScaleLevels, w, h, MAX_SIGMA, scaleLevels)
     teller = 1
     for x in i2:
-        print teller, "\n"
+        print(teller, "\n")
         teller += 1
-        print x
+        print(x)
 
     start_time =  time.clock()
     c = CoherentRandomGaussianDataStack(numScaleLevels, w, h, MAX_SIGMA, scaleLevels)
@@ -291,7 +291,7 @@ def testFunction():
 #        print x
 #        x += 1
         pass
-    print("===========> --- %s seconds ---" % ( time.clock() - start_time))
+    print(("===========> --- %s seconds ---" % ( time.clock() - start_time)))
 
     start_time =  time.clock()
     p = PartiallyCoherentScaledGaussianDataStack(numScaleLevels, w, h, sigma, MAX_SIGMA, scaleLevels, degree)
@@ -301,7 +301,7 @@ def testFunction():
 #        teller += 1
 #        print x
         pass
-    print("===========> --- %s seconds ---" % ( time.clock() - start_time))
+    print(("===========> --- %s seconds ---" % ( time.clock() - start_time)))
 
 
 
@@ -312,4 +312,4 @@ def testFunction():
 if __name__ == "__main__":
     testFunction()
 
-    print "Noice Done!"
+    print("Noice Done!")
