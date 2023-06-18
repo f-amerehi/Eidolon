@@ -48,9 +48,9 @@ class Convolution(object):
 
     # make kernel to convolve with
     def Kernel(self, xOrder, yOrder, w, h, sigma):
-        v = np.array(list(range(h/2 + 1)) + list(range(h/2-h + 1, 0)))
+        v = np.array(list(range(h//2 + 1)) + list(range(h//2-h + 1, 0)))
         column = ((-1.0/(sigma * sqrt(2)))**yOrder) * self.HermitePolynomial(yOrder, v/(sigma * sqrt(2))) * self.Gaussian(v, sigma)
-        u = np.array(list(range(w/2 + 1)) + list(range(w/2-w + 1, 0)))
+        u = np.array(list(range(w//2 + 1)) + list(range(w//2-w + 1, 0)))
         row = ((-1.0/(sigma * sqrt(2)))**xOrder) * self.HermitePolynomial(xOrder, u/(sigma * sqrt(2))) * self.Gaussian(u, sigma)
         return row * column[:, np.newaxis]
 
