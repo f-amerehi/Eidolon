@@ -14,4 +14,4 @@ The Python version relies rather heavily on generators, since there are sometime
 There’s a small library called eidolon (surprise) which contains the routines. There are 4 files there: helpers.py, noise.py, picture.py and scalespaces.py. This is where the magic happens.<br/>
 The file helpers.py contains a number of essential functions, picture.py is a class that contains all the basic stuff the picture does and the 2 others contain classes that provide the necessary generators. 
 
-The file eidolon.py just sets some parameters and calls upon the examples contained in examples.py. You can run both files (there’s a test function in examples.py). The eidolon.py file more or less mimics Jan’s start file in his original Processing (JAVA) version.
+The file eidolon-test.py just sets some parameters and calls upon the examples contained in examples.py. You can run both files (there’s a test function in examples.py). The eidolon.py file more or less mimics Jan’s start file in his original Processing (JAVA) version.
